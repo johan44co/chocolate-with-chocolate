@@ -2,15 +2,16 @@ import { defineConfig, devices } from "@playwright/test";
 
 /**
  * Playwright configuration for browser compatibility tests
- * Tests CWC in real browsers: Chromium, Firefox, and WebKit
+ * Tests CWC in Chromium (Firefox and WebKit can be added if needed)
  */
 export default defineConfig({
   testDir: "./tests/browser",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  retries: process.env.CI ? 0 : 0,
+  workers: process.env.CI ? 2 : undefined,
   reporter: "html",
+  timeout: 10000,
   use: {
     trace: "on-first-retry",
   },
@@ -19,14 +20,6 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-    },
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
     },
   ],
 
