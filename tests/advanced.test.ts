@@ -232,6 +232,10 @@ describe("Streaming", () => {
 
       await expect(decodeStream(mixed, "secret")).rejects.toThrow(/Chunk ID mismatch/);
     });
+
+    it("should throw on empty chunks array", async () => {
+      await expect(decodeStream([], "secret")).rejects.toThrow(/No chunks provided/);
+    });
   });
 
   describe("decodeStreamFromTokens", () => {
