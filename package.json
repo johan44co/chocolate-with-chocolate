@@ -1,6 +1,6 @@
 {
   "name": "chocolate-with-chocolate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Secure, compressed, encrypted token format for web applications",
   "type": "module",
   "main": "./dist/index.cjs",

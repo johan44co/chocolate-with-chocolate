@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-11-20
+
+### 🐛 Bug Fixes
+
+- Fix `decodeWithMetadata` export conflict - resolve naming collision between cwc.js and customMetadata.js versions
+- Improve browser test type definitions and assertions
+- Fix lz-string dynamic import for browser module loading
+- Improve Node.js 18 compatibility with crypto module typing
+- Fix browser test timeouts for CI environments
+- Enhance error handling in crypto operations
+
+### 🧪 Tests
+
+- Add comprehensive streaming utility edge case tests
+- Add empty chunks handling in streaming tests
+- Improve browser test coverage and type safety
+- Add randomBytes tests for Node.js 18 compatibility
+
+### ⚡ Performance
+
+- Optimize CI/browser tests with browser caching
+- Single browser instance in tests, increased worker threads
+- Increase Playwright test timeouts for stability
+
+### 📝 Documentation
+
+- Fix package name references (cwc → chocolate-with-chocolate)
+- Update repository references in CONTRIBUTING.md
+
+### 🔧 Maintenance
+
+- Remove NODE_AUTH_TOKEN from npm publish step
+- Improve test reliability and consistency
+
 ## [1.0.0] - 2025-11-20
 
 ### 🎉 Initial Release
