@@ -3,13 +3,20 @@
  * Works consistently in both Node.js and browser environments
  */
 
-let nodeCrypto: any = null;
+// Type for Node.js crypto module
+interface NodeCrypto {
+  getRandomValues?(bytes: Uint8Array): Uint8Array;
+  randomBytes?(length: number): Buffer;
+}
+
+let nodeCrypto: NodeCrypto | null = null;
 
 // Try to load Node.js crypto module for environments without globalThis.crypto
 try {
-  // Use dynamic require-like approach for Node.js
-  if (typeof globalThis.crypto === "undefined" && typeof module !== "undefined") {
-    nodeCrypto = require("crypto");
+  // Use dynamic import for Node.js crypto module
+  if (typeof globalThis.crypto === "undefined" && typeof module !== "undefined" && typeof require !== "undefined") {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    nodeCrypto = require("crypto") as NodeCrypto;
   }
 } catch {
   // If require fails, we'll fall back to globalThis.crypto or fail with a clear error
@@ -93,19 +100,22 @@ export function randomBytes(length: number): Uint8Array {
   const bytes = new Uint8Array(length);
 
   // Browser environment or Node.js with globalThis.crypto
-  if (typeof globalThis.crypto !== "undefined" && typeof globalThis.crypto.getRandomValues === "function") {
+  if (
+    typeof globalThis.crypto !== "undefined" &&
+    typeof globalThis.crypto.getRandomValues === "function"
+  ) {
     globalThis.crypto.getRandomValues(bytes);
     return bytes;
   }
 
-  // Node.js 18+ without globalThis.crypto
-  if (nodeCrypto && typeof nodeCrypto.getRandomValues === "function") {
+  // Node.js 18+ without globalThis.crypto - using node:crypto getRandomValues
+  if (nodeCrypto?.getRandomValues) {
     nodeCrypto.getRandomValues(bytes);
     return bytes;
   }
 
-  // Fallback for older Node.js versions
-  if (nodeCrypto && typeof nodeCrypto.randomBytes === "function") {
+  // Fallback for older Node.js versions using randomBytes
+  if (nodeCrypto?.randomBytes) {
     const randomBuffer = nodeCrypto.randomBytes(length);
     bytes.set(randomBuffer);
     return bytes;
