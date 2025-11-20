@@ -44,10 +44,7 @@ declare global {
         options?: EncodeOptions,
         chunkSize?: number
       ) => Promise<EncodedChunk[]>;
-      decodeStream: (
-        chunks: EncodedChunk[],
-        secret: string | Uint8Array
-      ) => Promise<unknown>;
+      decodeStream: (chunks: EncodedChunk[], secret: string | Uint8Array) => Promise<unknown>;
       selectCompressionAlgorithm: (data: unknown) => string;
     };
   }
@@ -74,7 +71,9 @@ test.describe("CWC Browser Compatibility", () => {
     const has_cwc = await page.evaluate(() => typeof (window as any).cwc !== "undefined");
     if (!has_cwc) {
       const error = await page.evaluate(() => (window as any).cwcError);
-      throw new Error(`CWC object not found on window. Error: ${error}. Module import may have failed.`);
+      throw new Error(
+        `CWC object not found on window. Error: ${error}. Module import may have failed.`
+      );
     }
 
     // Wait for CWC to load
@@ -204,7 +203,7 @@ test.describe("CWC Browser Compatibility", () => {
       try {
         const token = await window.cwc!.encode(data, key2);
         console.log("Token created:", token);
-        
+
         // decodeWithKeyFallback returns { data, keyIndex }
         const result = (await window.cwc!.decodeWithKeyFallback(token, [key1, key2, key3])) as {
           data: { value: number };
@@ -249,8 +248,7 @@ test.describe("CWC Browser Compatibility", () => {
         const remaining = window.cwc!.getRemainingTime(token);
 
         // Check if remaining is valid (between 0 and 5 seconds = 5000ms)
-        const hasTime =
-          remaining !== null && remaining > 100 && remaining <= 5000;
+        const hasTime = remaining !== null && remaining > 100 && remaining <= 5000;
 
         return { notExpired, hasTime };
       } catch (e) {
@@ -274,14 +272,16 @@ test.describe("CWC Browser Compatibility", () => {
         const token = await window.cwc!.encodeWithMetadata(data, customMeta, secret);
         const decoded = await window.cwc!.decodeWithMetadata(token, secret);
 
-        const wrapper = decoded as { data?: Record<string, unknown>; meta?: Record<string, unknown> };
+        const wrapper = decoded as {
+          data?: Record<string, unknown>;
+          meta?: Record<string, unknown>;
+        };
         const decodedData = wrapper.data || ({} as Record<string, unknown>);
         const decodedMeta = wrapper.meta || ({} as Record<string, unknown>);
 
         return {
           dataMatches: decodedData.value === "test",
-          metadataMatches:
-            decodedMeta.userId === "123" && decodedMeta.sessionId === "abc",
+          metadataMatches: decodedMeta.userId === "123" && decodedMeta.sessionId === "abc",
           decoded: decodedData,
           metadata: decodedMeta,
         };

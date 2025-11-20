@@ -31,13 +31,13 @@
       // Import CWC from the built bundle
       try {
         updateStatus("Importing CWC module...");
-        
+
         const cwcModule = await import("../../dist/index.js");
         updateStatus("CWC module imported");
-        
+
         // Extract functions
         const { encode, decode } = cwcModule;
-        const { 
+        const {
           rotateKey,
           decodeWithKeyFallback,
           isExpired,
@@ -81,7 +81,7 @@
         updateStatus("Encoding test data...");
         try {
           const token = await encode(data, secret);
-          
+
           updateStatus("Decoding test token...");
           const decoded = await decode(token, secret);
 
@@ -94,7 +94,9 @@
             throw new Error("Decode mismatch");
           }
         } catch (encodeDecodeError) {
-          throw new Error(`Encode/Decode failed: ${encodeDecodeError instanceof Error ? encodeDecodeError.message : String(encodeDecodeError)}`);
+          throw new Error(
+            `Encode/Decode failed: ${encodeDecodeError instanceof Error ? encodeDecodeError.message : String(encodeDecodeError)}`
+          );
         }
       } catch (error) {
         window.cwcReady = false;

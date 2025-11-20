@@ -58,9 +58,7 @@ describe("Streaming Utilities - Edge Cases", () => {
       };
 
       // Single chunk but says total is 999 - should fail
-      await expect(decodeStream([malformedChunk], "secret")).rejects.toThrow(
-        /Incomplete chunks/
-      );
+      await expect(decodeStream([malformedChunk], "secret")).rejects.toThrow(/Incomplete chunks/);
     });
 
     it("should validate sequential chunk indices", async () => {
@@ -90,9 +88,7 @@ describe("Streaming Utilities - Edge Cases", () => {
           ...chunks.slice(2),
         ];
 
-        await expect(decodeStream(modified, "secret")).rejects.toThrow(
-          /Missing chunk at index/
-        );
+        await expect(decodeStream(modified, "secret")).rejects.toThrow(/Missing chunk at index/);
       }
     });
 
@@ -151,10 +147,7 @@ describe("Streaming Utilities - Edge Cases", () => {
       const data = { single: true };
       const chunks = await encodeStream(data, "secret", {}, 1000);
 
-      const decoded = await decodeStreamFromTokens(
-        [chunks[0]!.token],
-        "secret"
-      );
+      const decoded = await decodeStreamFromTokens([chunks[0]!.token], "secret");
       expect(decoded).toEqual(data);
     });
 
@@ -235,12 +228,7 @@ describe("Streaming Utilities - Edge Cases", () => {
 
     it("should encode with custom options", async () => {
       const data = { compression: "test" };
-      const chunks = await encodeStream(
-        data,
-        "secret",
-        { compression: "lz-string" },
-        100
-      );
+      const chunks = await encodeStream(data, "secret", { compression: "lz-string" }, 100);
 
       const decoded = await decodeStream(chunks, "secret");
       expect(decoded).toEqual(data);

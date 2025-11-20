@@ -14,7 +14,11 @@ let nodeCrypto: NodeCrypto | null = null;
 // Try to load Node.js crypto module for environments without globalThis.crypto
 try {
   // Use dynamic import for Node.js crypto module
-  if (typeof globalThis.crypto === "undefined" && typeof module !== "undefined" && typeof require !== "undefined") {
+  if (
+    typeof globalThis.crypto === "undefined" &&
+    typeof module !== "undefined" &&
+    typeof require !== "undefined"
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     nodeCrypto = require("crypto") as NodeCrypto;
   }
