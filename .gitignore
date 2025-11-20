@@ -48,3 +48,5 @@ ROADMAP.md
 TODO.md
 PUBLISHING.md
 *.tgz
+playwright-report/
+test-results/

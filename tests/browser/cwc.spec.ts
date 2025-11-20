@@ -45,11 +45,35 @@ declare global {
 
 test.describe("CWC Browser Compatibility", () => {
   test.beforeEach(async ({ page }) => {
+    // Set up console logging for debugging
+    page.on("console", (msg) => {
+      const type = msg.type();
+      const text = msg.text();
+      if (type === "error" || type === "warning") {
+        console.log(`[BROWSER ${type.toUpperCase()}] ${text}`);
+      }
+    });
+
     // Navigate to test page
-    await page.goto("http://localhost:3000/tests/browser/test-page.html", { waitUntil: "networkidle" });
+    await page.goto("http://localhost:3000/tests/browser/test-page.html", {
+      waitUntil: "networkidle",
+      timeout: 30000,
+    });
+
+    // First check if cwc object exists
+    const has_cwc = await page.evaluate(() => typeof (window as any).cwc !== "undefined");
+    if (!has_cwc) {
+      const error = await page.evaluate(() => (window as any).cwcError);
+      throw new Error(`CWC object not found on window. Error: ${error}. Module import may have failed.`);
+    }
 
     // Wait for CWC to load
-    await page.waitForFunction(() => window.cwcReady === true, { timeout: 15000 });
+    await page.waitForFunction(
+      () => {
+        return (window as any).cwcReady === true;
+      },
+      { timeout: 15000 }
+    );
   });
 
   test("should load CWC library successfully", async ({ page, browserName }) => {

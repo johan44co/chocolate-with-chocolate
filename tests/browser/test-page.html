@@ -4,67 +4,106 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CWC Browser Tests</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "lz-string": "https://cdn.jsdelivr.net/npm/lz-string@1.5.0/+esm"
+        }
+      }
+    </script>
   </head>
   <body>
     <h1>CWC Browser Compatibility Test Page</h1>
+    <div id="status">Loading...</div>
     <div id="results"></div>
 
     <script type="module">
+      // Initialize ready flag and error
+      window.cwcReady = false;
+      window.cwcError = null;
+
+      // Update status for debugging
+      function updateStatus(msg) {
+        console.log(msg);
+        document.getElementById("status").textContent = msg;
+      }
+
       // Import CWC from the built bundle
-      import { encode, decode } from "../../dist/index.js";
-      import {
-        rotateKey,
-        decodeWithKeyFallback,
-        isExpired,
-        validateNotExpired,
-        getRemainingTime,
-        encodeWithMetadata,
-        decodeWithMetadata,
-        encodeStream,
-        decodeStream,
-        selectCompressionAlgorithm,
-      } from "../../dist/index.js";
+      try {
+        updateStatus("Importing CWC module...");
+        
+        const cwcModule = await import("../../dist/index.js");
+        updateStatus("CWC module imported");
+        
+        // Extract functions
+        const { encode, decode } = cwcModule;
+        const { 
+          rotateKey,
+          decodeWithKeyFallback,
+          isExpired,
+          validateNotExpired,
+          getRemainingTime,
+          encodeWithMetadata,
+          decodeWithMetadata,
+          encodeStream,
+          decodeStream,
+          selectCompressionAlgorithm,
+        } = cwcModule;
 
-      // Expose functions to global scope for Playwright tests
-      window.cwc = {
-        encode,
-        decode,
-        rotateKey,
-        decodeWithKeyFallback,
-        isExpired,
-        validateNotExpired,
-        getRemainingTime,
-        encodeWithMetadata,
-        decodeWithMetadata,
-        encodeStream,
-        decodeStream,
-        selectCompressionAlgorithm,
-      };
+        updateStatus("Functions extracted");
 
-      // Run basic sanity check
-      async function runSanityCheck() {
+        // Expose functions to global scope for Playwright tests
+        window.cwc = {
+          encode,
+          decode,
+          rotateKey,
+          decodeWithKeyFallback,
+          isExpired,
+          validateNotExpired,
+          getRemainingTime,
+          encodeWithMetadata,
+          decodeWithMetadata,
+          encodeStream,
+          decodeStream,
+          selectCompressionAlgorithm,
+        };
+
+        updateStatus("Running sanity check...");
+
+        // Run basic sanity check
+        const secret = "test-secret-key";
+        const data = { hello: "browser", timestamp: Date.now() };
+
+        updateStatus("Checking browser capabilities...");
+        console.log("CompressionStream available:", typeof CompressionStream !== "undefined");
+        console.log("DecompressionStream available:", typeof DecompressionStream !== "undefined");
+
+        updateStatus("Encoding test data...");
         try {
-          const secret = "test-secret-key";
-          const data = { hello: "browser", timestamp: Date.now() };
-
           const token = await encode(data, secret);
+          
+          updateStatus("Decoding test token...");
           const decoded = await decode(token, secret);
 
           if (decoded.hello === "browser" && decoded.timestamp === data.timestamp) {
             window.cwcReady = true;
+            updateStatus("✓ CWC loaded successfully");
             document.getElementById("results").innerHTML =
               '<p style="color: green;">✓ CWC loaded successfully</p>';
           } else {
             throw new Error("Decode mismatch");
           }
-        } catch (error) {
-          window.cwcReady = false;
-          document.getElementById("results").innerHTML =
-            `<p style="color: red;">✗ Error: ${error.message}</p>`;
+        } catch (encodeDecodeError) {
+          throw new Error(`Encode/Decode failed: ${encodeDecodeError instanceof Error ? encodeDecodeError.message : String(encodeDecodeError)}`);
         }
+      } catch (error) {
+        window.cwcReady = false;
+        window.cwcError = error instanceof Error ? error.message : String(error);
+        const msg = `✗ Error: ${window.cwcError}`;
+        updateStatus(msg);
+        document.getElementById("results").innerHTML = `<p style="color: red;">${msg}</p>`;
+        console.error("Detailed error:", error);
       }
-
-      runSanityCheck();
     </script>
   </body>
 </html>

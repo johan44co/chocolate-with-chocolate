@@ -4,7 +4,6 @@
  */
 
 import type { Compressor, CompressionAlgorithm } from "../types.js";
-import LZString from "lz-string";
 
 /**
  * No compression (pass-through)
@@ -24,11 +23,14 @@ class NoneCompressor implements Compressor {
  * Best for: Small to medium payloads, browser compatibility
  */
 class LZStringCompressor implements Compressor {
-  compress(data: Uint8Array): Uint8Array {
+  async compress(data: Uint8Array): Promise<Uint8Array> {
     // Handle empty input
     if (data.length === 0) {
       return new Uint8Array(0);
     }
+
+    // Dynamically import lz-string only when needed
+    const { default: LZString } = await import("lz-string");
 
     // Convert to base64 string for lz-string
     const base64 = btoa(String.fromCharCode(...data));
@@ -36,11 +38,14 @@ class LZStringCompressor implements Compressor {
     return compressed;
   }
 
-  decompress(data: Uint8Array): Uint8Array {
+  async decompress(data: Uint8Array): Promise<Uint8Array> {
     // Handle empty input
     if (data.length === 0) {
       return new Uint8Array(0);
     }
+
+    // Dynamically import lz-string only when needed
+    const { default: LZString } = await import("lz-string");
 
     const decompressed = LZString.decompressFromUint8Array(data);
     if (!decompressed) {
@@ -57,8 +62,9 @@ class LZStringCompressor implements Compressor {
 }
 
 /**
- * Brotli compression (Node.js native + browser fallback)
+ * Brotli compression (Node.js native only)
  * Best for: Large payloads, maximum compression ratio
+ * Browser: Uses LZ-String fallback (more reliable than CompressionStream)
  */
 class BrotliCompressor implements Compressor {
   async compress(data: Uint8Array): Promise<Uint8Array> {
@@ -86,43 +92,11 @@ class BrotliCompressor implements Compressor {
       }
     }
 
-    // Browser environment - use CompressionStream API if available
-    if (typeof CompressionStream !== "undefined") {
-      try {
-        const stream = new CompressionStream("deflate"); // Brotli not widely supported yet
-        const writer = stream.writable.getWriter();
-        await writer.write(data);
-        await writer.close();
-
-        const chunks: Uint8Array[] = [];
-        const reader = stream.readable.getReader();
-
-        let readResult = await reader.read();
-        while (!readResult.done) {
-          if (readResult.value) {
-            chunks.push(readResult.value);
-          }
-          readResult = await reader.read();
-        }
-
-        // Concatenate chunks
-        const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-        const result = new Uint8Array(totalLength);
-        let offset = 0;
-        for (const chunk of chunks) {
-          result.set(chunk, offset);
-          offset += chunk.length;
-        }
-
-        return result;
-      } catch {
-        throw new Error("Browser compression not available");
-      }
-    }
-
-    // Fallback to LZ-String for browsers without CompressionStream
+    // Browser environment - fallback to LZ-String
+    // Note: CompressionStream is not reliably available across browsers
+    // and can cause hangs in some implementations. LZ-String works everywhere.
     const lzCompressor = new LZStringCompressor();
-    return lzCompressor.compress(data);
+    return await lzCompressor.compress(data);
   }
 
   async decompress(data: Uint8Array): Promise<Uint8Array> {
@@ -141,43 +115,11 @@ class BrotliCompressor implements Compressor {
       }
     }
 
-    // Browser environment - use DecompressionStream API if available
-    if (typeof DecompressionStream !== "undefined") {
-      try {
-        const stream = new DecompressionStream("deflate");
-        const writer = stream.writable.getWriter();
-        await writer.write(data);
-        await writer.close();
-
-        const chunks: Uint8Array[] = [];
-        const reader = stream.readable.getReader();
-
-        let readResult = await reader.read();
-        while (!readResult.done) {
-          if (readResult.value) {
-            chunks.push(readResult.value);
-          }
-          readResult = await reader.read();
-        }
-
-        // Concatenate chunks
-        const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-        const result = new Uint8Array(totalLength);
-        let offset = 0;
-        for (const chunk of chunks) {
-          result.set(chunk, offset);
-          offset += chunk.length;
-        }
-
-        return result;
-      } catch {
-        throw new Error("Browser decompression not available");
-      }
-    }
-
-    // Fallback to LZ-String for browsers without DecompressionStream
+    // Browser environment - fallback to LZ-String
+    // Note: DecompressionStream is not reliably available across browsers
+    // and can cause hangs in some implementations. LZ-String works everywhere.
     const lzCompressor = new LZStringCompressor();
-    return lzCompressor.decompress(data);
+    return await lzCompressor.decompress(data);
   }
 }
 
