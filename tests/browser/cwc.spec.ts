@@ -191,17 +191,32 @@ test.describe("CWC Browser Compatibility", () => {
       const key2 = "key-2";
       const key3 = "key-3";
 
-      const token = await window.cwc!.encode(data, key2);
-      const decoded = (await window.cwc!.decodeWithKeyFallback(token, [key1, key2, key3])) as {
-        value: number;
-      };
+      try {
+        const token = await window.cwc!.encode(data, key2);
+        console.log("Token created:", token);
+        
+        // decodeWithKeyFallback returns { data, keyIndex }
+        const result = (await window.cwc!.decodeWithKeyFallback(token, [key1, key2, key3])) as {
+          data: { value: number };
+          keyIndex: number;
+        };
+        console.log("Decoded with key fallback:", result);
 
-      return {
-        matches: decoded.value === 42,
-        usedCorrectKey: true,
-      };
+        return {
+          matches: result.data.value === 42,
+          usedCorrectKey: result.keyIndex === 1,
+        };
+      } catch (e) {
+        console.error("Key fallback test error:", e);
+        return {
+          matches: false,
+          usedCorrectKey: false,
+          error: String(e),
+        };
+      }
     });
 
+    console.log("Key fallback result:", result);
     expect(result.matches).toBe(true);
   });
 
@@ -210,19 +225,28 @@ test.describe("CWC Browser Compatibility", () => {
       const data = { test: "ttl" };
       const secret = "test-key";
 
-      // Create token with 2 second TTL
-      const token = await window.cwc!.encode(data, secret, { ttl: 2000 });
+      try {
+        // Create token with 2 second TTL - must include timestamp!
+        const token = await window.cwc!.encode(data, secret, { ttl: 2000, includeTimestamp: true });
+        console.log("TTL token created:", token);
 
-      // Should not be expired immediately
-      const notExpired = !window.cwc!.isExpired(token);
+        // Should not be expired immediately
+        const notExpired = !window.cwc!.isExpired(token);
+        console.log("Is expired:", window.cwc!.isExpired(token), "notExpired:", notExpired);
 
-      // Get remaining time
-      const remaining = window.cwc!.getRemainingTime(token);
-      const hasTime = remaining > 0 && remaining <= 2000;
+        // Get remaining time
+        const remaining = window.cwc!.getRemainingTime(token);
+        console.log("Remaining time:", remaining);
+        const hasTime = remaining !== null && remaining > 0 && remaining <= 2000;
 
-      return { notExpired, hasTime };
+        return { notExpired, hasTime };
+      } catch (e) {
+        console.error("TTL test error:", e);
+        return { notExpired: false, hasTime: false, error: String(e) };
+      }
     });
 
+    console.log("TTL result:", result);
     expect(result.notExpired).toBe(true);
     expect(result.hasTime).toBe(true);
   });
@@ -233,17 +257,32 @@ test.describe("CWC Browser Compatibility", () => {
       const secret = "test-key";
       const customMeta = { userId: "123", sessionId: "abc" };
 
-      const token = await window.cwc!.encodeWithMetadata(data, secret, customMeta);
-      const result = await window.cwc!.decodeWithMetadata(token, secret);
-      const decoded = result.data as { value: string };
-      const metadata = result.metadata as { userId: string; sessionId: string };
+      try {
+        // Cast to bypass TypeScript issues - at runtime window.cwc has all the functions
+        const cwc = window.cwc as { encodeWithMetadata: (d: unknown, m: unknown, s: string) => Promise<string>; decodeWithMetadata: (t: string, s: string) => Promise<{ data: unknown; metadata: unknown }> };
+        
+        const token = await cwc.encodeWithMetadata(data, customMeta, secret);
+        console.log("Metadata token created:", token);
+        
+        const res = await cwc.decodeWithMetadata(token, secret);
+        console.log("Decoded metadata result:", res);
+        
+        const decoded = res.data as Record<string, unknown>;
+        const metadata = res.metadata as Record<string, unknown>;
 
-      return {
-        dataMatches: decoded.value === "test",
-        metadataMatches: metadata.userId === "123" && metadata.sessionId === "abc",
-      };
+        return {
+          dataMatches: (decoded as Record<string, unknown>).value === "test",
+          metadataMatches: metadata.userId === "123" && metadata.sessionId === "abc",
+          decoded,
+          metadata,
+        };
+      } catch (e) {
+        console.error("Metadata test error:", e);
+        return { dataMatches: false, metadataMatches: false, error: String(e) };
+      }
     });
 
+    console.log("Metadata result:", result);
     expect(result.dataMatches).toBe(true);
     expect(result.metadataMatches).toBe(true);
   });
@@ -257,20 +296,27 @@ test.describe("CWC Browser Compatibility", () => {
       };
       const secret = "test-key";
 
-      const chunks = await window.cwc!.encodeStream(largeData, secret, {
-        chunkSize: 1024 * 10,
-      });
+      try {
+        // Use a smaller chunk size to force multiple chunks
+        const chunks = await window.cwc!.encodeStream(largeData, secret, {}, 1024 * 5);
+        console.log("Encoded chunks:", chunks.length);
 
-      const decoded = (await window.cwc!.decodeStream(chunks, secret)) as {
-        items: Array<{ id: number; value: string }>;
-      };
+        const decoded = (await window.cwc!.decodeStream(chunks, secret)) as {
+          items: Array<{ id: number; value: string }>;
+        };
+        console.log("Decoded items:", decoded.items.length);
 
-      return {
-        chunkCount: chunks.length,
-        dataMatches: decoded.items.length === 500 && decoded.items[0].id === 0,
-      };
+        return {
+          chunkCount: chunks.length,
+          dataMatches: decoded.items.length === 500 && decoded.items[0].id === 0,
+        };
+      } catch (e) {
+        console.error("Streaming test error:", e);
+        return { chunkCount: 0, dataMatches: false, error: String(e) };
+      }
     });
 
+    console.log("Streaming result:", result);
     expect(result.chunkCount).toBeGreaterThan(1);
     expect(result.dataMatches).toBe(true);
   });
