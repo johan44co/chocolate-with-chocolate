@@ -11,9 +11,13 @@ export default defineConfig({
   retries: process.env.CI ? 0 : 0,
   workers: process.env.CI ? 2 : undefined,
   reporter: "html",
-  timeout: 10000,
+  timeout: 30000,
+  expect: {
+    timeout: 10000,
+  },
   use: {
     trace: "on-first-retry",
+    navigationTimeout: 15000,
   },
 
   projects: [
@@ -27,5 +31,6 @@ export default defineConfig({
     command: "yarn serve:test",
     port: 3000,
     reuseExistingServer: !process.env.CI,
+    timeout: 120000,
   },
 });

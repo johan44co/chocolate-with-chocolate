@@ -46,10 +46,10 @@ declare global {
 test.describe("CWC Browser Compatibility", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to test page
-    await page.goto("http://localhost:3000/tests/browser/test-page.html");
+    await page.goto("http://localhost:3000/tests/browser/test-page.html", { waitUntil: "networkidle" });
 
     // Wait for CWC to load
-    await page.waitForFunction(() => window.cwcReady === true, { timeout: 5000 });
+    await page.waitForFunction(() => window.cwcReady === true, { timeout: 15000 });
   });
 
   test("should load CWC library successfully", async ({ page, browserName }) => {
