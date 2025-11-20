@@ -14,7 +14,7 @@ import {
   validateKeyRotation,
   getRotationAge,
   extractMetadata,
-} from "cwc";
+} from "chocolate-with-chocolate";
 
 // ============================================================================
 // Strategy 1: Simple Key Rotation

@@ -7,7 +7,7 @@
 
 import express from "express";
 import cookieParser from "cookie-parser";
-import { encode, decode, isExpired, validateNotExpired } from "cwc";
+import { encode, decode, isExpired, validateNotExpired } from "chocolate-with-chocolate";
 
 const app = express();
 const PORT = 3000;

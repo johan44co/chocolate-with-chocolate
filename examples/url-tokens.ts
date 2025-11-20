@@ -8,7 +8,7 @@
  * - Invitation tokens
  */
 
-import { encode, decode, isExpired, validateNotExpired, extractMetadata } from "cwc";
+import { encode, decode, isExpired, validateNotExpired, extractMetadata } from "chocolate-with-chocolate";
 
 // IMPORTANT: Use environment variables in production!
 const RESET_SECRET = process.env.RESET_SECRET || "password-reset-secret";

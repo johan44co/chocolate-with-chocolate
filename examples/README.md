@@ -134,15 +134,15 @@ npx tsx key-rotation.ts
 ### Install CWC
 
 ```bash
-npm install cwc
+npm install chocolate-with-chocolate
 # or
-yarn add cwc
+yarn add chocolate-with-chocolate
 ```
 
 ### Basic Usage
 
 ```typescript
-import { encode, decode } from 'cwc';
+import { encode, decode } from 'chocolate-with-chocolate';
 
 // Encode
 const token = await encode({ userId: 123 }, 'secret-key');

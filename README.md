@@ -33,17 +33,17 @@ Developers often make critical mistakes with client-side data:
 ## Installation
 
 ```bash
-npm install cwc
+npm install chocolate-with-chocolate
 # or
-yarn add cwc
+yarn add chocolate-with-chocolate
 # or
-pnpm add cwc
+pnpm add chocolate-with-chocolate
 ```
 
 ## Quick Start
 
 ```typescript
-import { encode, decode } from 'cwc';
+import { encode, decode } from 'chocolate-with-chocolate';
 
 // Encode data
 const token = await encode({ userId: 123, role: 'admin' }, 'your-secret-key');
@@ -128,7 +128,7 @@ console.log(metadata);
 Safely rotate encryption keys without losing access to old tokens.
 
 ```typescript
-import { rotateKey, decodeWithKeyFallback } from 'cwc';
+import { rotateKey, decodeWithKeyFallback } from 'chocolate-with-chocolate';
 
 // Rotate a single token
 const oldToken = await encode(data, 'old-key');
@@ -146,7 +146,7 @@ console.log(`Decoded with key ${keyIndex}`);
 **Batch rotation:**
 
 ```typescript
-import { rotateKeys } from 'cwc';
+import { rotateKeys } from 'chocolate-with-chocolate';
 
 const oldTokens = [token1, token2, token3];
 const newTokens = await rotateKeys(oldTokens, 'old-key', 'new-key');
@@ -162,7 +162,7 @@ import {
   isExpired, 
   getRemainingTime, 
   validateNotExpired 
-} from 'cwc';
+} from 'chocolate-with-chocolate';
 
 // Create token with TTL
 const token = await encode(
@@ -192,7 +192,7 @@ try {
 **Check if expiring soon:**
 
 ```typescript
-import { willExpireSoon } from 'cwc';
+import { willExpireSoon } from 'chocolate-with-chocolate';
 
 if (willExpireSoon(token, 5 * 60 * 1000)) { // 5 minutes
   console.log('Token will expire soon, consider refreshing');
@@ -204,7 +204,7 @@ if (willExpireSoon(token, 5 * 60 * 1000)) { // 5 minutes
 Add application-specific metadata to tokens (stored in encrypted payload).
 
 ```typescript
-import { encodeWithMetadata, decodeWithMetadata } from 'cwc';
+import { encodeWithMetadata, decodeWithMetadata } from 'chocolate-with-chocolate';
 
 // Encode with custom metadata
 const token = await encodeWithMetadata(
@@ -222,7 +222,7 @@ console.log(meta); // { userId: 'u123', sessionId: 's456', role: 'admin' }
 **Type-safe metadata:**
 
 ```typescript
-import { createTypedMetadata } from 'cwc';
+import { createTypedMetadata } from 'chocolate-with-chocolate';
 
 const userToken = createTypedMetadata({
   userId: 'string',
@@ -245,7 +245,7 @@ const result = await userToken.decode(token, 'secret');
 Split large payloads into chunks for memory-efficient processing.
 
 ```typescript
-import { encodeStream, decodeStream, shouldStream } from 'cwc';
+import { encodeStream, decodeStream, shouldStream } from 'chocolate-with-chocolate';
 
 const largeData = { items: Array(10000).fill({/*...*/}) };
 
@@ -274,7 +274,7 @@ if (shouldStream(largeData)) {
 Intelligent compression algorithm selection based on payload characteristics.
 
 ```typescript
-import { selectCompressionAlgorithm, analyzePayload } from 'cwc';
+import { selectCompressionAlgorithm, analyzePayload } from 'chocolate-with-chocolate';
 
 const data = { text: 'Some data...' };
 
@@ -301,7 +301,7 @@ console.log(analysis);
 ### 1. Secure localStorage/sessionStorage
 
 ```typescript
-import { encode, decode } from 'cwc';
+import { encode, decode } from 'chocolate-with-chocolate';
 
 // Store sensitive data securely
 const userData = { userId: 123, email: 'user@example.com' };
@@ -318,7 +318,7 @@ if (token) {
 ### 2. Encrypted Cookies
 
 ```typescript
-import { encode, decode } from 'cwc';
+import { encode, decode } from 'chocolate-with-chocolate';
 
 // Server-side (Node.js)
 const sessionData = { userId: 123, role: 'admin' };
@@ -333,7 +333,7 @@ const data = await decode(token, process.env.COOKIE_SECRET);
 ### 3. Magic Links / Password Reset Tokens
 
 ```typescript
-import { encode, decode } from 'cwc';
+import { encode, decode } from 'chocolate-with-chocolate';
 
 // Generate password reset token
 const resetData = { 
@@ -364,7 +364,7 @@ try {
 ### 4. Offline PWA State
 
 ```typescript
-import { encode, decode } from 'cwc';
+import { encode, decode } from 'chocolate-with-chocolate';
 
 // Save offline state
 const appState = { cart: [...], preferences: {...} };
@@ -612,7 +612,7 @@ import type {
   EncodeOptions,
   CompressionAlgorithm,
   KeyMaterial 
-} from 'cwc';
+} from 'chocolate-with-chocolate';
 
 // Full type inference
 const data: UserData = await decode<UserData>(token, secret);
