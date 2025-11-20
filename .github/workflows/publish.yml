@@ -50,7 +50,18 @@ jobs:
           npm pack
           tar -tzf *.tgz | head -20
 
+      - name: Check if version exists on npm
+        id: check-version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view chocolate-with-chocolate@$VERSION > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish to npm
+        if: steps.check-version.outputs.exists == 'false'
         run: npm publish --provenance --access public
 
       - name: Create GitHub Release
