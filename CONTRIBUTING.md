@@ -13,8 +13,8 @@ Thank you for your interest in contributing to CWC! 🍫
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/cwc.git
-cd cwc
+git clone https://github.com/johan44co/chocolate-with-chocolate.git
+cd chocolate-with-chocolate
 
 # Install dependencies
 yarn install
@@ -139,7 +139,7 @@ describe('Feature', () => {
 ## Project Structure
 
 ```
-cwc/
+chocolate-with-chocolate/
 ├── src/
 │   ├── core/           # Core functionality (crypto, compression)
 │   ├── utils/          # Utility functions
