@@ -37,7 +37,7 @@ declare global {
       decodeWithMetadata: (
         token: string,
         secret: string | Uint8Array
-      ) => Promise<{ data: unknown; meta: Record<string, unknown> }>;
+      ) => Promise<{ data: unknown; metadata: Record<string, unknown> }>;
       encodeStream: (
         data: unknown,
         secret: string | Uint8Array,
@@ -272,23 +272,18 @@ test.describe("CWC Browser Compatibility", () => {
 
       try {
         const token = await window.cwc!.encodeWithMetadata(data, customMeta, secret);
-        const res: any = await window.cwc!.decodeWithMetadata(token, secret);
+        const decoded = await window.cwc!.decodeWithMetadata(token, secret);
 
-        // The decoded wrapper has the structure we need
-        // Return it as-is so we can verify the structure
+        const wrapper = decoded as { data?: Record<string, unknown>; meta?: Record<string, unknown> };
+        const decodedData = wrapper.data || ({} as Record<string, unknown>);
+        const decodedMeta = wrapper.meta || ({} as Record<string, unknown>);
+
         return {
-          dataMatches:
-            res &&
-            ((res.data && res.data.value === "test") ||
-              (res.value === "test")),
+          dataMatches: decodedData.value === "test",
           metadataMatches:
-            res &&
-            ((res.meta &&
-              res.meta.userId === "123" &&
-              res.meta.sessionId === "abc") ||
-              (typeof res !== "object" ? false : true)), // If we can't access meta, at least return true if object
-          decoded: res,
-          metadata: res,
+            decodedMeta.userId === "123" && decodedMeta.sessionId === "abc",
+          decoded: decodedData,
+          metadata: decodedMeta,
         };
       } catch (e) {
         console.error("Metadata test error:", e);
@@ -296,11 +291,8 @@ test.describe("CWC Browser Compatibility", () => {
       }
     });
 
-    console.log("Metadata result:", result);
-    // Just check that we got data and metadata back in the decoded structure
-    expect(result.decoded).toBeTruthy();
-    expect(result.decoded.data || result.decoded.value).toBeTruthy();
-    expect((result.decoded.meta || result.decoded).userId).toBe("123");
+    expect(result.dataMatches).toBe(true);
+    expect(result.metadataMatches).toBe(true);
   });
 
   test("should handle streaming for large payloads", async ({ page }) => {

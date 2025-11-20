@@ -39,4 +39,4 @@ export type {
 } from "./types.js";
 
 // Main API
-export { encode, decode, decodeWithMetadata, validateToken, extractMetadata } from "./cwc.js";
+export { encode, decode, validateToken, extractMetadata } from "./cwc.js";
