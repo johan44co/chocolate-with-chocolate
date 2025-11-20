@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from "@jest/globals";
 import { encode, decode } from "../src/cwc.js";
+import { randomBytes } from "../src/utils/buffers.js";
 import {
   rotateKey,
   rotateKeys,
@@ -155,14 +156,12 @@ describe("Key Rotation", () => {
     });
 
     it("should handle Uint8Array keys", async () => {
-      const key = new Uint8Array(32);
-      crypto.getRandomValues(key);
+      const key = randomBytes(32);
 
       const data = { test: "value" };
       const token = await encode(data, key);
 
-      const wrongKey = new Uint8Array(32);
-      crypto.getRandomValues(wrongKey);
+      const wrongKey = randomBytes(32);
 
       const result = await decodeWithKeyFallback(token, [wrongKey, key]);
 

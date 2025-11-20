@@ -3,6 +3,18 @@
  * Works consistently in both Node.js and browser environments
  */
 
+let nodeCrypto: any = null;
+
+// Try to load Node.js crypto module for environments without globalThis.crypto
+try {
+  // Use dynamic require-like approach for Node.js
+  if (typeof globalThis.crypto === "undefined" && typeof module !== "undefined") {
+    nodeCrypto = require("crypto");
+  }
+} catch {
+  // If require fails, we'll fall back to globalThis.crypto or fail with a clear error
+}
+
 /**
  * Convert a string to Uint8Array using UTF-8 encoding
  * @param str - String to convert
@@ -80,9 +92,22 @@ export function copyBytes(bytes: Uint8Array): Uint8Array {
 export function randomBytes(length: number): Uint8Array {
   const bytes = new Uint8Array(length);
 
-  // Node.js and browser environment
-  if (typeof crypto !== "undefined") {
-    crypto.getRandomValues(bytes);
+  // Browser environment or Node.js with globalThis.crypto
+  if (typeof globalThis.crypto !== "undefined" && typeof globalThis.crypto.getRandomValues === "function") {
+    globalThis.crypto.getRandomValues(bytes);
+    return bytes;
+  }
+
+  // Node.js 18+ without globalThis.crypto
+  if (nodeCrypto && typeof nodeCrypto.getRandomValues === "function") {
+    nodeCrypto.getRandomValues(bytes);
+    return bytes;
+  }
+
+  // Fallback for older Node.js versions
+  if (nodeCrypto && typeof nodeCrypto.randomBytes === "function") {
+    const randomBuffer = nodeCrypto.randomBytes(length);
+    bytes.set(randomBuffer);
     return bytes;
   }
 

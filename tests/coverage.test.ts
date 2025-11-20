@@ -5,6 +5,7 @@
 
 import { encode, decode } from "../src/cwc.js";
 import { compress, decompress } from "../src/core/compression.js";
+import { randomBytes } from "../src/utils/buffers.js";
 import type { CompressionAlgorithm } from "../src/types.js";
 
 describe("Coverage Tests", () => {
@@ -112,8 +113,7 @@ describe("Coverage Tests", () => {
   describe("Crypto Edge Cases", () => {
     test("should handle Uint8Array secrets", async () => {
       const data = { test: "uint8array-secret" };
-      const secret = new Uint8Array(32);
-      crypto.getRandomValues(secret);
+      const secret = randomBytes(32);
 
       const token = await encode(data, secret);
       const decoded = await decode(token, secret);
@@ -125,15 +125,13 @@ describe("Coverage Tests", () => {
       const data = { test: "secret-sizes" };
 
       // 32-byte key (standard)
-      const key32 = new Uint8Array(32);
-      crypto.getRandomValues(key32);
+      const key32 = randomBytes(32);
       const token32 = await encode(data, key32);
       const decoded32 = await decode(token32, key32);
       expect(decoded32).toEqual(data);
 
       // Different size should fail
-      const key16 = new Uint8Array(16);
-      crypto.getRandomValues(key16);
+      const key16 = randomBytes(16);
       await expect(encode(data, key16)).rejects.toThrow();
     });
 
