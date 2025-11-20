@@ -1,0 +1,92 @@
+{
+  "name": "chocolate-with-chocolate",
+  "version": "1.0.0",
+  "description": "Secure, compressed, encrypted token format for web applications",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:browser": "playwright test",
+    "test:browser:ui": "playwright test --ui",
+    "serve:test": "python3 -m http.server 3000",
+    "benchmark": "yarn build && tsx benchmarks/performance.ts",
+    "size": "yarn build && tsx scripts/analyze-bundle.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "yarn build && yarn test && yarn lint && yarn format:check"
+  },
+  "keywords": [
+    "encryption",
+    "compression",
+    "token",
+    "aes-gcm",
+    "security",
+    "crypto",
+    "encoding",
+    "web",
+    "browser",
+    "typescript"
+  ],
+  "author": "Chocolate With Chocolate Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johan44co/chocolate-with-chocolate.git"
+  },
+  "homepage": "https://github.com/johan44co/chocolate-with-chocolate#readme",
+  "bugs": {
+    "url": "https://github.com/johan44co/chocolate-with-chocolate/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@jest/globals": "^30.2.0",
+    "@playwright/test": "^1.56.1",
+    "@types/jest": "^30.0.0",
+    "@types/lz-string": "^1.5.0",
+    "@types/node": "^24.10.1",
+    "bundlesize2": "^0.0.35",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.5.0",
+    "gzip-size-cli": "^5.1.0",
+    "jest": "^30.2.0",
+    "playwright": "^1.56.1",
+    "prettier": "^3.6.2",
+    "terser": "^5.44.1",
+    "ts-jest": "^29.4.5",
+    "tsup": "^8.5.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.47.0"
+  },
+  "dependencies": {
+    "lz-string": "^1.5.0"
+  }
+}

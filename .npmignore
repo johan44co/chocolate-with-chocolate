@@ -1,0 +1,63 @@
+# .npmignore - Files to exclude from npm package
+
+# Source files
+src/
+
+# Tests
+tests/
+__tests__/
+*.test.ts
+*.spec.ts
+*.test.js
+*.spec.js
+playwright.config.ts
+jest.config.js
+
+# Benchmarks and scripts
+benchmarks/
+scripts/
+
+# Examples (keep in git but not npm)
+examples/
+
+# Configuration files
+.github/
+.vscode/
+.git/
+.gitignore
+tsconfig.json
+tsup.config.ts
+eslint.config.mjs
+.prettierrc
+.prettierignore
+.eslintrc*
+.editorconfig
+
+# Documentation (keep some, exclude others)
+TODO.md
+ROADMAP.md
+PHASE8-SUMMARY.md
+.github/
+
+# Build artifacts
+*.log
+*.tgz
+.DS_Store
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Development
+node_modules/
+.env
+.env.local
+*.local
+
+# Keep these in the package:
+# README.md
+# CHANGELOG.md
+# LICENSE
+# CONTRIBUTING.md
+# dist/
+# package.json

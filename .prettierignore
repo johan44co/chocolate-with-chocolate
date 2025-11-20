@@ -1,0 +1,12 @@
+# Ignore artifacts
+dist
+build
+coverage
+
+# Ignore all markdown files
+*.md
+
+# Ignore package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

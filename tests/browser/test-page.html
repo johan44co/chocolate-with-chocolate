@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CWC Browser Tests</title>
+  </head>
+  <body>
+    <h1>CWC Browser Compatibility Test Page</h1>
+    <div id="results"></div>
+
+    <script type="module">
+      // Import CWC from the built bundle
+      import { encode, decode } from "../../dist/index.js";
+      import {
+        rotateKey,
+        decodeWithKeyFallback,
+        isExpired,
+        validateNotExpired,
+        getRemainingTime,
+        encodeWithMetadata,
+        decodeWithMetadata,
+        encodeStream,
+        decodeStream,
+        selectCompressionAlgorithm,
+      } from "../../dist/index.js";
+
+      // Expose functions to global scope for Playwright tests
+      window.cwc = {
+        encode,
+        decode,
+        rotateKey,
+        decodeWithKeyFallback,
+        isExpired,
+        validateNotExpired,
+        getRemainingTime,
+        encodeWithMetadata,
+        decodeWithMetadata,
+        encodeStream,
+        decodeStream,
+        selectCompressionAlgorithm,
+      };
+
+      // Run basic sanity check
+      async function runSanityCheck() {
+        try {
+          const secret = "test-secret-key";
+          const data = { hello: "browser", timestamp: Date.now() };
+
+          const token = await encode(data, secret);
+          const decoded = await decode(token, secret);
+
+          if (decoded.hello === "browser" && decoded.timestamp === data.timestamp) {
+            window.cwcReady = true;
+            document.getElementById("results").innerHTML =
+              '<p style="color: green;">✓ CWC loaded successfully</p>';
+          } else {
+            throw new Error("Decode mismatch");
+          }
+        } catch (error) {
+          window.cwcReady = false;
+          document.getElementById("results").innerHTML =
+            `<p style="color: red;">✗ Error: ${error.message}</p>`;
+        }
+      }
+
+      runSanityCheck();
+    </script>
+  </body>
+</html>

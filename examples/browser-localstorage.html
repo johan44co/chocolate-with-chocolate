@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CWC - Secure Browser Storage Example</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      h1 {
+        color: #663399;
+      }
+      .container {
+        background: #f5f5f5;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      input,
+      textarea,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      button {
+        background: #663399;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      button:hover {
+        background: #552288;
+      }
+      .output {
+        background: white;
+        padding: 15px;
+        border-left: 4px solid #663399;
+        margin: 10px 0;
+        overflow-wrap: break-word;
+      }
+      .error {
+        border-left-color: #dc3545;
+        color: #dc3545;
+      }
+      .success {
+        border-left-color: #28a745;
+        color: #28a745;
+      }
+      pre {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        background: #663399;
+        color: white;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🍫 CWC - Secure Browser Storage</h1>
+    <p>
+      This example demonstrates how to use CWC for secure localStorage/sessionStorage. Your
+      sensitive data is compressed and encrypted before storage.
+    </p>
+
+    <div class="container">
+      <h2>Save User Data <span class="badge">Encrypted</span></h2>
+      <input type="text" id="userId" placeholder="User ID (e.g., 123)" />
+      <input type="text" id="name" placeholder="Name" />
+      <input type="email" id="email" placeholder="Email" />
+      <input type="text" id="role" placeholder="Role (e.g., admin, user)" />
+      <input
+        type="password"
+        id="secret"
+        placeholder="Encryption Secret Key"
+        value="my-secure-secret-key"
+      />
+      <button onclick="saveUserData()">💾 Save to Encrypted Storage</button>
+      <div id="saveOutput"></div>
+    </div>
+
+    <div class="container">
+      <h2>Load User Data <span class="badge">Decrypted</span></h2>
+      <input
+        type="password"
+        id="loadSecret"
+        placeholder="Decryption Secret Key"
+        value="my-secure-secret-key"
+      />
+      <button onclick="loadUserData()">📂 Load from Encrypted Storage</button>
+      <div id="loadOutput"></div>
+    </div>
+
+    <div class="container">
+      <h2>Inspect Raw Storage <span class="badge">Base64 Token</span></h2>
+      <button onclick="inspectStorage()">🔍 Inspect localStorage</button>
+      <div id="inspectOutput"></div>
+    </div>
+
+    <div class="container">
+      <h2>Clear Storage</h2>
+      <button onclick="clearStorage()" style="background: #dc3545">🗑️ Clear All Data</button>
+    </div>
+
+    <!-- Import CWC from CDN or local build -->
+    <script type="module">
+      // In production, use: import { encode, decode } from 'cwc';
+      // For this example, we'll use a simple implementation demonstration
+
+      // Note: This is a simplified demo. In production:
+      // 1. Import CWC via npm/yarn
+      // 2. Use a bundler (Vite, Webpack, etc.)
+      // 3. Never hardcode secrets in HTML
+
+      window.cwcDemo = {
+        async saveData(data, secret) {
+          // Simulate CWC encode
+          const json = JSON.stringify(data);
+          const encoder = new TextEncoder();
+          const dataBuffer = encoder.encode(json);
+
+          // Generate key from secret
+          const keyMaterial = await crypto.subtle.importKey(
+            "raw",
+            encoder.encode(secret),
+            "PBKDF2",
+            false,
+            ["deriveBits", "deriveKey"]
+          );
+
+          const key = await crypto.subtle.deriveKey(
+            {
+              name: "PBKDF2",
+              salt: encoder.encode("cwc-salt"),
+              iterations: 100000,
+              hash: "SHA-256",
+            },
+            keyMaterial,
+            { name: "AES-GCM", length: 256 },
+            false,
+            ["encrypt", "decrypt"]
+          );
+
+          // Encrypt
+          const iv = crypto.getRandomValues(new Uint8Array(12));
+          const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, dataBuffer);
+
+          // Combine IV + encrypted data
+          const combined = new Uint8Array(iv.length + encrypted.byteLength);
+          combined.set(iv, 0);
+          combined.set(new Uint8Array(encrypted), iv.length);
+
+          // Base64 encode
+          return btoa(String.fromCharCode(...combined));
+        },
+
+        async loadData(token, secret) {
+          // Decode base64
+          const combined = Uint8Array.from(atob(token), (c) => c.charCodeAt(0));
+
+          // Extract IV and ciphertext
+          const iv = combined.slice(0, 12);
+          const ciphertext = combined.slice(12);
+
+          const encoder = new TextEncoder();
+
+          // Generate key from secret
+          const keyMaterial = await crypto.subtle.importKey(
+            "raw",
+            encoder.encode(secret),
+            "PBKDF2",
+            false,
+            ["deriveBits", "deriveKey"]
+          );
+
+          const key = await crypto.subtle.deriveKey(
+            {
+              name: "PBKDF2",
+              salt: encoder.encode("cwc-salt"),
+              iterations: 100000,
+              hash: "SHA-256",
+            },
+            keyMaterial,
+            { name: "AES-GCM", length: 256 },
+            false,
+            ["encrypt", "decrypt"]
+          );
+
+          // Decrypt
+          const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+
+          // Decode JSON
+          const decoder = new TextDecoder();
+          const json = decoder.decode(decrypted);
+          return JSON.parse(json);
+        },
+      };
+
+      window.saveUserData = async function () {
+        try {
+          const userData = {
+            userId: document.getElementById("userId").value,
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            role: document.getElementById("role").value,
+            timestamp: Date.now(),
+          };
+
+          const secret = document.getElementById("secret").value;
+
+          if (!userData.userId || !secret) {
+            throw new Error("Please fill in User ID and Secret Key");
+          }
+
+          // Encode and save
+          const token = await window.cwcDemo.saveData(userData, secret);
+          localStorage.setItem("cwc_user", token);
+
+          document.getElementById("saveOutput").innerHTML = `
+          <div class="output success">
+            ✅ <strong>Saved successfully!</strong><br>
+            Token length: ${token.length} characters<br>
+            Stored in: localStorage['cwc_user']<br>
+            <small>Data is encrypted with AES-GCM-256</small>
+          </div>
+        `;
+        } catch (error) {
+          document.getElementById("saveOutput").innerHTML = `
+          <div class="output error">
+            ❌ <strong>Error:</strong> ${error.message}
+          </div>
+        `;
+        }
+      };
+
+      window.loadUserData = async function () {
+        try {
+          const token = localStorage.getItem("cwc_user");
+          if (!token) {
+            throw new Error("No data found in storage. Save some data first.");
+          }
+
+          const secret = document.getElementById("loadSecret").value;
+          if (!secret) {
+            throw new Error("Please enter the decryption secret key");
+          }
+
+          // Decode
+          const userData = await window.cwcDemo.loadData(token, secret);
+
+          const age = Date.now() - userData.timestamp;
+          const ageText =
+            age < 60000
+              ? `${Math.floor(age / 1000)} seconds ago`
+              : `${Math.floor(age / 60000)} minutes ago`;
+
+          document.getElementById("loadOutput").innerHTML = `
+          <div class="output success">
+            ✅ <strong>Decrypted successfully!</strong><br><br>
+            <strong>User Data:</strong>
+            <pre>${JSON.stringify(userData, null, 2)}</pre>
+            <small>Saved ${ageText}</small>
+          </div>
+        `;
+        } catch (error) {
+          document.getElementById("loadOutput").innerHTML = `
+          <div class="output error">
+            ❌ <strong>Error:</strong> ${error.message}<br>
+            <small>Make sure you're using the correct secret key</small>
+          </div>
+        `;
+        }
+      };
+
+      window.inspectStorage = function () {
+        const token = localStorage.getItem("cwc_user");
+        if (!token) {
+          document.getElementById("inspectOutput").innerHTML = `
+          <div class="output">No data in storage</div>
+        `;
+          return;
+        }
+
+        document.getElementById("inspectOutput").innerHTML = `
+        <div class="output">
+          <strong>Raw localStorage value:</strong><br>
+          <textarea readonly rows="4" style="font-family: monospace; font-size: 12px;">${token}</textarea>
+          <br>
+          <strong>Stats:</strong><br>
+          • Length: ${token.length} characters<br>
+          • Size: ~${Math.round(token.length * 0.75)} bytes<br>
+          • Encrypted: ✅ Yes (AES-GCM-256)<br>
+          • Readable without key: ❌ No<br><br>
+          <small>This is what an attacker would see - completely unreadable!</small>
+        </div>
+      `;
+      };
+
+      window.clearStorage = function () {
+        localStorage.removeItem("cwc_user");
+        document.getElementById("saveOutput").innerHTML = "";
+        document.getElementById("loadOutput").innerHTML = "";
+        document.getElementById("inspectOutput").innerHTML = `
+        <div class="output success">✅ Storage cleared</div>
+      `;
+      };
+    </script>
+
+    <hr style="margin: 40px 0" />
+
+    <h2>📚 Implementation Notes</h2>
+    <div class="container">
+      <h3>In a Real Application:</h3>
+      <pre>
+// 1. Install CWC
+npm install cwc
+
+// 2. Import in your app
+import { encode, decode } from 'cwc';
+
+// 3. Save data
+const token = await encode(userData, SECRET_KEY);
+localStorage.setItem('user', token);
+
+// 4. Load data
+const token = localStorage.getItem('user');
+const data = await decode(token, SECRET_KEY);
+</pre
+      >
+
+      <h3>Security Considerations:</h3>
+      <ul>
+        <li>✅ <strong>Use environment variables</strong> for secret keys</li>
+        <li>✅ <strong>Never hardcode secrets</strong> in client-side code</li>
+        <li>✅ <strong>Add TTL</strong> for automatic expiration</li>
+        <li>✅ <strong>Validate data</strong> after decoding</li>
+        <li>✅ <strong>Use HTTPS</strong> when transmitting tokens</li>
+        <li>❌ <strong>Don't store passwords</strong> - use proper hashing</li>
+      </ul>
+    </div>
+  </body>
+</html>
