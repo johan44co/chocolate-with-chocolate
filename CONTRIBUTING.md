@@ -185,7 +185,7 @@ Before implementing a new feature:
 
 Found a security vulnerability? Please **DO NOT** open a public issue.
 
-Email security@example.com with:
+Email contact@johancorrales.com with:
 - Description of the vulnerability
 - Steps to reproduce
 - Potential impact
@@ -207,6 +207,6 @@ Email security@example.com with:
 
 - 💬 Open a Discussion
 - 🐛 Report bugs in Issues
-- 📧 Email: support@example.com
+- 📧 Email: contact@johancorrales.com
 
 Thank you for contributing! 🙏
