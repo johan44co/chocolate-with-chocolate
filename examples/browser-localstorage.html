@@ -1,128 +1,137 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CWC - Secure Browser Storage Example</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CWC - Secure Browser Storage Example</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      max-width: 800px;
-      margin: 50px auto;
-      padding: 20px;
-      line-height: 1.6;
-    }
+      h1 {
+        color: #663399;
+      }
 
-    h1 {
-      color: #663399;
-    }
+      .container {
+        background: #f5f5f5;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
 
-    .container {
-      background: #f5f5f5;
-      padding: 20px;
-      border-radius: 8px;
-      margin: 20px 0;
-    }
+      input,
+      textarea,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
 
-    input,
-    textarea,
-    button {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-    }
+      button {
+        background: #663399;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+      }
 
-    button {
-      background: #663399;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
+      button:hover {
+        background: #552288;
+      }
 
-    button:hover {
-      background: #552288;
-    }
+      .output {
+        background: white;
+        padding: 15px;
+        border-left: 4px solid #663399;
+        margin: 10px 0;
+        overflow-wrap: break-word;
+      }
 
-    .output {
-      background: white;
-      padding: 15px;
-      border-left: 4px solid #663399;
-      margin: 10px 0;
-      overflow-wrap: break-word;
-    }
+      .error {
+        border-left-color: #dc3545;
+        color: #dc3545;
+      }
 
-    .error {
-      border-left-color: #dc3545;
-      color: #dc3545;
-    }
+      .success {
+        border-left-color: #28a745;
+        color: #28a745;
+      }
 
-    .success {
-      border-left-color: #28a745;
-      color: #28a745;
-    }
+      pre {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
 
-    pre {
-      background: #2d2d2d;
-      color: #f8f8f2;
-      padding: 15px;
-      border-radius: 4px;
-      overflow-x: auto;
-    }
+      .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        background: #663399;
+        color: white;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-left: 10px;
+      }
+    </style>
+  </head>
 
-    .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      background: #663399;
-      color: white;
-      border-radius: 4px;
-      font-size: 12px;
-      margin-left: 10px;
-    }
-  </style>
-</head>
+  <body>
+    <h1>🍫 CWC - Secure Browser Storage</h1>
+    <p>
+      This example demonstrates how to use CWC for secure localStorage/sessionStorage. Your
+      sensitive data is compressed and encrypted before storage.
+    </p>
 
-<body>
-  <h1>🍫 CWC - Secure Browser Storage</h1>
-  <p>
-    This example demonstrates how to use CWC for secure localStorage/sessionStorage. Your
-    sensitive data is compressed and encrypted before storage.
-  </p>
+    <div class="container">
+      <h2>Save User Data <span class="badge">Encrypted</span></h2>
+      <input type="text" id="userId" placeholder="User ID (e.g., 123)" />
+      <input type="text" id="name" placeholder="Name" />
+      <input type="email" id="email" placeholder="Email" />
+      <input type="text" id="role" placeholder="Role (e.g., admin, user)" />
+      <input
+        type="password"
+        id="secret"
+        placeholder="Encryption Secret Key"
+        value="my-secure-secret-key"
+      />
+      <button onclick="saveUserData()">💾 Save to Encrypted Storage</button>
+      <div id="saveOutput"></div>
+    </div>
 
-  <div class="container">
-    <h2>Save User Data <span class="badge">Encrypted</span></h2>
-    <input type="text" id="userId" placeholder="User ID (e.g., 123)" />
-    <input type="text" id="name" placeholder="Name" />
-    <input type="email" id="email" placeholder="Email" />
-    <input type="text" id="role" placeholder="Role (e.g., admin, user)" />
-    <input type="password" id="secret" placeholder="Encryption Secret Key" value="my-secure-secret-key" />
-    <button onclick="saveUserData()">💾 Save to Encrypted Storage</button>
-    <div id="saveOutput"></div>
-  </div>
+    <div class="container">
+      <h2>Load User Data <span class="badge">Decrypted</span></h2>
+      <input
+        type="password"
+        id="loadSecret"
+        placeholder="Decryption Secret Key"
+        value="my-secure-secret-key"
+      />
+      <button onclick="loadUserData()">📂 Load from Encrypted Storage</button>
+      <div id="loadOutput"></div>
+    </div>
 
-  <div class="container">
-    <h2>Load User Data <span class="badge">Decrypted</span></h2>
-    <input type="password" id="loadSecret" placeholder="Decryption Secret Key" value="my-secure-secret-key" />
-    <button onclick="loadUserData()">📂 Load from Encrypted Storage</button>
-    <div id="loadOutput"></div>
-  </div>
+    <div class="container">
+      <h2>Inspect Raw Storage <span class="badge">Base64 Token</span></h2>
+      <button onclick="inspectStorage()">🔍 Inspect localStorage</button>
+      <div id="inspectOutput"></div>
+    </div>
 
-  <div class="container">
-    <h2>Inspect Raw Storage <span class="badge">Base64 Token</span></h2>
-    <button onclick="inspectStorage()">🔍 Inspect localStorage</button>
-    <div id="inspectOutput"></div>
-  </div>
+    <div class="container">
+      <h2>Clear Storage</h2>
+      <button onclick="clearStorage()" style="background: #dc3545">🗑️ Clear All Data</button>
+    </div>
 
-  <div class="container">
-    <h2>Clear Storage</h2>
-    <button onclick="clearStorage()" style="background: #dc3545">🗑️ Clear All Data</button>
-  </div>
-
-  <!-- Import CWC from local build -->
-  <!-- 
+    <!-- Import CWC from local build -->
+    <!-- 
       Import Map: Maps module names to URLs
       - chocolate-with-chocolate: Uses local build (../../dist/index.js)
       - lz-string: Uses CDN because:
@@ -130,7 +139,7 @@
         2. CDN works with file:// protocol (no HTTP server needed)
         3. Local node_modules would require HTTP server due to CORS
     -->
-  <script type="importmap">
+    <script type="importmap">
       {
         "imports": {
           "chocolate-with-chocolate": "../../dist/index.js",
@@ -138,38 +147,38 @@
         }
       }
     </script>
-  <script type="module">
-    // Import actual CWC library
-    import { encode, decode } from 'chocolate-with-chocolate';
+    <script type="module">
+      // Import actual CWC library
+      import { encode, decode } from "chocolate-with-chocolate";
 
-    window.saveUserData = async function () {
-      try {
-        const userData = {
-          userId: document.getElementById("userId").value,
-          name: document.getElementById("name").value,
-          email: document.getElementById("email").value,
-          role: document.getElementById("role").value,
-          timestamp: Date.now(),
-        };
+      window.saveUserData = async function () {
+        try {
+          const userData = {
+            userId: document.getElementById("userId").value,
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            role: document.getElementById("role").value,
+            timestamp: Date.now(),
+          };
 
-        const secret = document.getElementById("secret").value;
+          const secret = document.getElementById("secret").value;
 
-        if (!userData.userId || !secret) {
-          throw new Error("Please fill in User ID and Secret Key");
-        }
+          if (!userData.userId || !secret) {
+            throw new Error("Please fill in User ID and Secret Key");
+          }
 
-        // Encode with actual CWC library - includes compression, metadata, and TTL
-        // Note: In browsers, 'brotli' automatically falls back to 'lz-string'
-        // We explicitly use 'lz-string' here to be clear about what runs
-        const token = await encode(userData, secret, {
-          compression: 'lz-string', // Browser-compatible compression (pure JS)
-          includeTimestamp: true,
-          ttl: 3600 // 1 hour expiration
-        });
+          // Encode with actual CWC library - includes compression, metadata, and TTL
+          // Note: In browsers, 'brotli' automatically falls back to 'lz-string'
+          // We explicitly use 'lz-string' here to be clear about what runs
+          const token = await encode(userData, secret, {
+            compression: "lz-string", // Browser-compatible compression (pure JS)
+            includeTimestamp: true,
+            ttl: 3600, // 1 hour expiration
+          });
 
-        localStorage.setItem("cwc_user", token);
+          localStorage.setItem("cwc_user", token);
 
-        document.getElementById("saveOutput").innerHTML = `
+          document.getElementById("saveOutput").innerHTML = `
           <div class="output success">
             ✅ <strong>Saved successfully!</strong><br>
             Token length: ${token.length} characters<br>
@@ -178,37 +187,37 @@
             <small>Token expires in 1 hour</small>
           </div>
         `;
-      } catch (error) {
-        document.getElementById("saveOutput").innerHTML = `
+        } catch (error) {
+          document.getElementById("saveOutput").innerHTML = `
           <div class="output error">
             ❌ <strong>Error:</strong> ${error.message}
           </div>
         `;
-      }
-    };
-
-    window.loadUserData = async function () {
-      try {
-        const token = localStorage.getItem("cwc_user");
-        if (!token) {
-          throw new Error("No data found in storage. Save some data first.");
         }
+      };
 
-        const secret = document.getElementById("loadSecret").value;
-        if (!secret) {
-          throw new Error("Please enter the decryption secret key");
-        }
+      window.loadUserData = async function () {
+        try {
+          const token = localStorage.getItem("cwc_user");
+          if (!token) {
+            throw new Error("No data found in storage. Save some data first.");
+          }
 
-        // Decode with actual CWC library
-        const userData = await decode(token, secret);
+          const secret = document.getElementById("loadSecret").value;
+          if (!secret) {
+            throw new Error("Please enter the decryption secret key");
+          }
 
-        const age = Date.now() - userData.timestamp;
-        const ageText =
-          age < 60000
-            ? `${Math.floor(age / 1000)} seconds ago`
-            : `${Math.floor(age / 60000)} minutes ago`;
+          // Decode with actual CWC library
+          const userData = await decode(token, secret);
 
-        document.getElementById("loadOutput").innerHTML = `
+          const age = Date.now() - userData.timestamp;
+          const ageText =
+            age < 60000
+              ? `${Math.floor(age / 1000)} seconds ago`
+              : `${Math.floor(age / 60000)} minutes ago`;
+
+          document.getElementById("loadOutput").innerHTML = `
           <div class="output success">
             ✅ <strong>Decrypted successfully!</strong><br><br>
             <strong>User Data:</strong>
@@ -216,26 +225,26 @@
             <small>Saved ${ageText}</small>
           </div>
         `;
-      } catch (error) {
-        document.getElementById("loadOutput").innerHTML = `
+        } catch (error) {
+          document.getElementById("loadOutput").innerHTML = `
           <div class="output error">
             ❌ <strong>Error:</strong> ${error.message}<br>
             <small>Make sure you're using the correct secret key</small>
           </div>
         `;
-      }
-    };
+        }
+      };
 
-    window.inspectStorage = function () {
-      const token = localStorage.getItem("cwc_user");
-      if (!token) {
-        document.getElementById("inspectOutput").innerHTML = `
+      window.inspectStorage = function () {
+        const token = localStorage.getItem("cwc_user");
+        if (!token) {
+          document.getElementById("inspectOutput").innerHTML = `
           <div class="output">No data in storage</div>
         `;
-        return;
-      }
+          return;
+        }
 
-      document.getElementById("inspectOutput").innerHTML = `
+        document.getElementById("inspectOutput").innerHTML = `
         <div class="output">
           <strong>Raw localStorage value:</strong><br>
           <textarea readonly rows="4" style="font-family: monospace; font-size: 12px;">${token}</textarea>
@@ -249,24 +258,24 @@
           <small>This is what an attacker would see - completely unreadable!</small>
         </div>
       `;
-    };
+      };
 
-    window.clearStorage = function () {
-      localStorage.removeItem("cwc_user");
-      document.getElementById("saveOutput").innerHTML = "";
-      document.getElementById("loadOutput").innerHTML = "";
-      document.getElementById("inspectOutput").innerHTML = `
+      window.clearStorage = function () {
+        localStorage.removeItem("cwc_user");
+        document.getElementById("saveOutput").innerHTML = "";
+        document.getElementById("loadOutput").innerHTML = "";
+        document.getElementById("inspectOutput").innerHTML = `
         <div class="output success">✅ Storage cleared</div>
       `;
-    };
-  </script>
+      };
+    </script>
 
-  <hr style="margin: 40px 0" />
+    <hr style="margin: 40px 0" />
 
-  <h2>📚 Implementation Notes</h2>
-  <div class="container">
-    <h3>In a Real Application:</h3>
-    <pre>
+    <h2>📚 Implementation Notes</h2>
+    <div class="container">
+      <h3>In a Real Application:</h3>
+      <pre>
 // 1. Install CWC
 npm install chocolate-with-chocolate
 
@@ -280,18 +289,18 @@ localStorage.setItem('user', token);
 // 4. Load data
 const token = localStorage.getItem('user');
 const data = await decode(token, SECRET_KEY);
-</pre>
+</pre
+      >
 
-    <h3>Security Considerations:</h3>
-    <ul>
-      <li>✅ <strong>Use environment variables</strong> for secret keys</li>
-      <li>✅ <strong>Never hardcode secrets</strong> in client-side code</li>
-      <li>✅ <strong>Add TTL</strong> for automatic expiration</li>
-      <li>✅ <strong>Validate data</strong> after decoding</li>
-      <li>✅ <strong>Use HTTPS</strong> when transmitting tokens</li>
-      <li>❌ <strong>Don't store passwords</strong> - use proper hashing</li>
-    </ul>
-  </div>
-</body>
-
+      <h3>Security Considerations:</h3>
+      <ul>
+        <li>✅ <strong>Use environment variables</strong> for secret keys</li>
+        <li>✅ <strong>Never hardcode secrets</strong> in client-side code</li>
+        <li>✅ <strong>Add TTL</strong> for automatic expiration</li>
+        <li>✅ <strong>Validate data</strong> after decoding</li>
+        <li>✅ <strong>Use HTTPS</strong> when transmitting tokens</li>
+        <li>❌ <strong>Don't store passwords</strong> - use proper hashing</li>
+      </ul>
+    </div>
+  </body>
 </html>
