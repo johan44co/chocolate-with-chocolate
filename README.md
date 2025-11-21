@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/Tests-272%20passing-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/Tests-346%20passing-brightgreen.svg)](#)
 
 **CWC** is a modern, secure token encoding library that combines compression and encryption into a single, elegant API. Perfect for secure client-side storage, encrypted cookies, magic links, and more.
 
@@ -22,7 +22,7 @@ Developers often make critical mistakes with client-side data:
 ### Key Features
 
 - 🔐 **Secure by default**: AES-GCM-256 encryption with unique IVs
-- 📦 **Smart compression**: Brotli, LZ-String, Zlib, or auto-select
+- 📦 **Smart compression**: Brotli (Node.js), LZ-String (browser), Zlib (Node.js), or auto-select
 - 🌐 **Cross-platform**: Works in Node.js and browsers
 - 🔄 **Key rotation**: Built-in support for rotating encryption keys
 - ⏱️ **TTL support**: Token expiration and validation
@@ -587,9 +587,9 @@ Get highest-scoring algorithm.
 | Algorithm | Speed | Ratio | Best For |
 |-----------|-------|-------|----------|
 | none | ⚡⚡⚡⚡⚡ | 1.0x | Already compressed data |
-| lz-string | ⚡⚡⚡⚡ | 2-4x | Small/medium payloads, browser |
-| zlib | ⚡⚡⚡ | 3-5x | Medium payloads, Node.js |
-| brotli | ⚡⚡ | 4-6x | Large payloads, best compression |
+| lz-string | ⚡⚡⚡⚡ | 2-4x | Browser (pure JS, works everywhere) |
+| zlib | ⚡⚡⚡ | 3-5x | Node.js only |
+| brotli | ⚡⚡ | 4-6x | Node.js (falls back to LZ-String in browser) |
 
 **Recommendation**: Use auto-compression selection for optimal results.
 
@@ -651,7 +651,7 @@ MIT © 2024
 ## FAQ
 
 **Q: Is CWC production-ready?**  
-A: Yes! CWC has 272 passing tests covering all features and edge cases.
+A: Yes! CWC has 346 passing tests covering all features and edge cases.
 
 **Q: Can I use CWC in the browser?**  
 A: Yes, CWC works in both Node.js and modern browsers via Web Crypto API.
